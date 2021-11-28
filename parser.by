@@ -1,0 +1,32 @@
+import csv
+from datetime import datetime
+import requests
+from bs4 import BeautifulSoup
+
+
+def get_html(url):
+    response = requests.get(url)
+    return response.text
+
+
+def get_all_links_catalog(html):
+    soup = BeautifulSoup(html, 'lxml')
+    cat_links = soup.find('div', id='catalog-menu').find_all('a')
+    links = []
+    for link in cat_links:
+        a = "https://storgom.ua" + link.get('href')
+        links.append(a)
+    for item in links:
+        pages_html = get_html(item)
+        soup2 = BeautifulSoup(pages_html, 'lxml')
+        sub_cut_links = soup2.find('div', class_='categories-list')
+        sub_links = sub_cut_links.find_all('a', class_='d-flex')
+        
+        freelancers_list = []
+    for i in sub_links:
+        fl ='https://storgom.com.ua' + i.get('href')
+        freelancers_list.append(fl)
+    print (freelancers_list)
+
+
+get_all_links_catalog(get_html('https://storgom.ua/'))
