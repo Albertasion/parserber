@@ -1,0 +1,49 @@
+import lxml as lxml
+from bs4 import BeautifulSoup
+import requests
+
+
+
+basic_url = 'https://storgom.ua'
+# ссылки главных категорий
+catalog_links_main = []
+
+r = requests.get('https://storgom.ua/')
+html_main = r.text
+soup = BeautifulSoup(html_main, 'lxml')
+catalog = soup.find(id="catalog-menu")
+a_catalog = catalog.find_all("a")
+for a_cat in a_catalog:
+    href_a_cat = a_cat['href']
+    links_cat = f'{basic_url}{href_a_cat}'
+    catalog_links_main.append(links_cat)
+
+# cсылки подкатегорий
+catalog_sub_links = []
+
+for catalog_link_main in catalog_links_main:
+    req = requests.get(catalog_link_main).text
+    soup1 = BeautifulSoup(req, "lxml")
+    a1 = soup1.find_all("div", class_ = "categories-list_item")
+    for i in a1:
+        tag_a = i.find('a')
+        href_sub = tag_a['href']
+        links_sub_cat = f'{basic_url}{href_sub}'
+#         catalog_sub_links.append(links_sub_cat)
+        print(links_sub_cat)
+
+
+
+
+# for page_cat_main in catalog_links_main:
+#     print(page_cat_main)
+#     req = requests.get(page_cat_main)
+#     html_page = r.text
+#     soup1 = BeautifulSoup(html_page, 'lxml')
+
+
+    # page_cat = soup1.find_all('a', class_ = 'd-flex')
+
+
+    # print(soup.prettify())
+
