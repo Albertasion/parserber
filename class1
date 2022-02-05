@@ -1,0 +1,59 @@
+import lxml as lxml
+from bs4 import BeautifulSoup
+import requests
+from fake_useragent import UserAgent
+from random import choice
+import csv
+proxy_list = open("http_proxies.txt").read().split('\n')
+
+class Parser:
+    def __init__(self):
+        self.basic_url = 'https://storgom.ua'
+# ссылки главных категорий
+        self.catalog_links_main = []
+# cсылки подкатегорий
+        self.catalog_sub_links = []
+        self.ua = UserAgent()
+        self.headers = {
+            "accept": "*/*",
+            "user-agent": self.ua.random
+        }
+
+# метод вытягивания сссылок главной навигации
+    def get_main_catalog(self):
+        r = requests.get(url=self.basic_url, headers=self.headers)
+        html_main = r.text
+        soup = BeautifulSoup(html_main, 'lxml')
+        catalog = soup.find(id="catalog-menu")
+        a_catalog = catalog.find_all("a")
+        for a_cat in a_catalog:
+            href_a_cat = a_cat['href']
+            links_cat = f'{self.basic_url}{href_a_cat}'
+            self.catalog_links_main.append(links_cat)
+        # return self.catalog_links_main
+        print(self.catalog_links_main)
+
+
+    def get_sub_catalogs(self):
+        for catalog_link_main in self.catalog_links_main:
+            rand_proxies = choice(proxy_list)
+            proxy = {"http": f"http://{rand_proxies}"}
+            req = requests.get(url= catalog_link_main, headers=self.headers, proxies=proxy).text
+            soup1 = BeautifulSoup(req, "lxml")
+            a1 = soup1.find_all("div", class_ = "categories-list_item")
+            for i in a1:
+                tag_a = i.find('a')
+                href_sub = tag_a['href']
+                links_sub_cat = f'{self.basic_url}{href_sub}'
+                self.catalog_sub_links.append(links_sub_cat)
+            for row1 in self.catalog_sub_links:
+                    print(row1)
+
+    def main(self):
+        self.get_main_catalog()
+        self.get_sub_catalogs()
+
+
+if __name__ == "__main__":
+    parser = Parser()
+    parser.main()
