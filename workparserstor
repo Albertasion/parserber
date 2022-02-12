@@ -1,0 +1,307 @@
+import lxml as lxml
+from bs4 import BeautifulSoup
+import requests
+from fake_useragent import UserAgent
+from random import choice
+import asyncio
+import aiohttp
+import csv
+proxy_list = open("http_proxies.txt").read().split('\n')
+
+class Parser:
+    def __init__(self):
+        self.basic_url = 'https://storgom.ua'
+# ссылки главных категорий
+        self.catalog_links_main = []
+# cсылки подкатегорий
+        self.catalog_sub_links = []
+        self.page_links = []
+        self.all_products_links = []
+        self.products_url = []
+        self.csv_rows = []
+        self.all_links = []
+        self.ua = UserAgent()
+        self.headers = {
+            "accept": "*/*",
+            "user-agent": self.ua.random
+        }
+
+# # метод вытягивания сссылок главной навигации
+#     def get_main_catalog(self):
+#         all_main_catalog_text = []
+#         r = requests.get(url=self.basic_url, headers=self.headers)
+#         html_main = r.text
+#         soup = BeautifulSoup(html_main, 'lxml')
+#         catalog = soup.find(id="catalog-menu")
+#         a_catalog = catalog.find_all("a")
+#         for a_cat in a_catalog:
+#             href_a_cat = a_cat['href']
+#             text_a_cat = a_cat.text.strip()
+#             links_cat = f'{self.basic_url}{href_a_cat}'
+#             self.catalog_links_main.append(links_cat)
+#             all_main_catalog_text.append(text_a_cat)
+#             with open('main_catalog.txt', 'a') as a_writer:
+#                 a_writer.write(links_cat)
+
+
+        # print("Главная навигация вытянута")
+        # print(self.catalog_links_main)
+        # print(all_main_catalog_text)
+        # # with open('main_catalog.txt', 'a') as a_writer:
+        # #     a_writer.write(self.catalog_links_main)
+
+
+    # def get_sub_catalogs(self):
+    #     for catalog_link_main in self.catalog_links_main:
+    #         rand_proxies = choice(proxy_list)
+    #         proxy = {"http": f"http://{rand_proxies}"}
+    #         req = requests.get(url= catalog_link_main, headers=self.headers, proxies=proxy)
+    #         print(proxy)
+    #         soup1 = BeautifulSoup(req.text, "lxml")
+    #         a1 = soup1.find_all("div", class_ = "categories-list_item")
+    #         for i in a1:
+    #             tag_a = i.find('a')
+    #             href_sub = tag_a['href']
+    #             a_text_sub = tag_a.text.strip()
+    #             links_sub_cat = f'{self.basic_url}{href_sub}'
+    #             # print(f'{links_sub_cat}: {a_text_sub}')
+    #             self.catalog_sub_links.append(links_sub_cat)
+    #         print("Свубкаталог добавлен в масссив")
+    #     with open("sublinks.csv", "w", encoding="utf-8", newline='') as file:
+    #         writer = csv.writer(file)
+    #         for row in self.catalog_sub_links:
+    #             writer.writerow([row])
+    #             print(row)
+    # def get_links_from_file(self):
+    #
+    #     with open("sublinks.csv") as file:
+    #         for row in file:
+    #             clean_row = row.strip()
+    #             self.catalog_sub_links.append(clean_row)
+
+        # print(self.catalog_sub_links)
+    # def get_all_links(self):
+    #     pages_pc = []
+    #     for link in self.catalog_sub_links:
+    #         numbers = []
+    #         rand_proxies = choice(proxy_list)
+    #         proxy = {"http": f"http://{rand_proxies}"}
+    #         response = requests.get(url = link, headers=self.headers, proxies = proxy).text
+    #         soup = BeautifulSoup(response, 'lxml')
+    #         try:
+    #             div_pagination = soup.find("div", class_="pagination").find_all("a")
+    #             for a in div_pagination:
+    #                 page_num = a.text
+    #                 numbers.append(page_num)
+    #         except:
+    #             self.page_links.append(link)
+    #             print(f'Silka dobavlena v pamjatj: {link}')
+    #         try:
+    #             last = numbers[-2]
+    #             pages_pc.append(last)
+    #
+    #         except:
+    #             pass
+
+            # pages_pc.append(last)
+            # print(pages_pc)
+
+
+        # for last_page, link in zip(pages_pc, self.catalog_sub_links):
+        #     self.page_links.append(link)
+        #     for i in range(2, int(last_page) + 1):
+        #         clean_link = link.split('.html')[0]
+        #         page_link = f"{clean_link}/page-{i}.html"
+        #         self.page_links.append(page_link)
+        # print(self.page_links)
+        # with open("pagelinks.csv", "w", encoding="utf-8", newline='') as file:
+        #
+        #     writer = csv.writer(file)
+        #     for row in self.page_links:
+        #         writer.writerow([row])
+
+
+
+
+
+
+    # def get_pagination(self):
+    #     for link in self.catalog_sub_links:
+    #         rand_proxies = choice(proxy_list)
+    #         proxy = {"http": f"http://{rand_proxies}"}
+    #         req2 = requests.get(url=link, headers=self.headers, proxies=proxy)
+    #         soup2 = BeautifulSoup(req2.text, "lxml")
+    #         div_pagination = soup2.find("div", class_="pagination")
+    #         try:
+    #             a_pagination = div_pagination.find_all("a")
+    #             # print(a_pagination)
+    #         except:
+    #             pass
+    #         # if a_pagination is None:
+    #         #     print(link)
+    #         # else:
+    #         #     print(a_pagination)
+    #         # print(f'{link}:{div_pagination[-2]}')
+
+
+
+    #
+    #
+    #
+    # async def get_pagination(self, session, link, num):
+    #
+    #     # numbers = []
+    #     # for link in self.catalog_sub_links:
+    #
+    #     rand_proxies = choice(proxy_list)
+    #     proxys = f"http://{rand_proxies}"
+    #     try:
+    #         async with session.get(url=link, headers=self.headers, proxy=proxys) as response:
+    #             req2 = await response.text()
+    #             soup2 = BeautifulSoup(req2, "lxml")
+    #             div_pagination = soup2.find("div", class_="pagination")
+    #             print(div_pagination)
+    #     except:
+    #         pass
+    #     # try:
+    #     #     async with session.get(url=link, headers=self.headers, proxy=proxys) as response:
+    #     #         req = await response.text
+    #     #         soup2 = BeautifulSoup(req, "lxml")
+    #     #         div_pagination = soup2.find("div", class_="pagination")
+    #     #         print(div_pagination)
+    #     #     #     try:
+    #         #         last_page = div_pagination.find_all("a")
+    #         #         for a_last in last_page:
+    #         #             page_num = a_last.text.strip()
+    #         #             print(f'{pages}{page_num}')
+    #         #             numbers.append(page_num)
+    #         #     except:
+    #         #         pass
+    #         # print(numbers[-2])
+    #     # except:
+    #     #     print('Какая то проблема')
+    #
+    #
+    # async def gather_tasks_pagination(self):
+    #     print("Gathering pag tasks\n")
+    #     async with aiohttp.ClientSession() as session:
+    #         pagination_tasks = []
+    #         for num, link in enumerate(self.catalog_sub_links):
+    #
+    #             task = asyncio.create_task(self.get_pagination(session, link, num))
+    #             pagination_tasks.append(task)
+    #         await asyncio.gather(*pagination_tasks)
+
+
+
+    # def get_pagination(self):
+    #     numbers = []
+    #     for pages in self.catalog_sub_links:
+    #         rand_proxies = choice(proxy_list)
+    #         proxy = {"http": f"http://{rand_proxies}"}
+    #         req = requests.get(url=pages, headers=self.headers, proxies=proxy).text
+    #         soup2 = BeautifulSoup(req, "lxml")
+    #         div_pagination = soup2.find("div", class_ = "pagination")
+    #         try:
+    #             last_page = div_pagination.find_all("a")
+    #             for a_last in last_page:
+    #                 page_num = a_last.text.strip()
+    #                 print(f'{pages}{page_num}')
+    #                 numbers.append(page_num)
+    #         except:
+    #             pass
+    #     print(numbers[-2])
+    # def get_all_products(self):
+    #     with open("pagelinks.csv") as file:
+    #         for row in file:
+    #             clc_link = row.split('\n')[0]
+    #             self.all_products_links.append(clc_link)
+    #
+    #
+    #     for links in self.all_products_links:
+    #         rand_proxies = choice(proxy_list)
+    #         proxy = {"http": f"http://{rand_proxies}"}
+    #         req = requests.get(url=links, headers=self.headers, proxies=proxy).text
+    #         soup2 = BeautifulSoup(req, "lxml")
+    #         div_product = soup2.find_all("div", class_="products-list_item-wrap")
+    #         for a_prod in div_product:
+    #             prod_url = a_prod.find('a')
+    #             prod_href = prod_url["href"]
+    #             full_prod_url = f'{self.basic_url}{prod_href}'
+    #             print(full_prod_url)
+    #             self.products_url.append(full_prod_url)
+    #
+    #
+    #     with open("productslinks.csv", "w", encoding="utf-8", newline='') as file:
+    #         writer = csv.writer(file)
+    #         for row in self.products_url:
+    #             writer.writerow([row])
+    #             print(row)
+
+    def add_to_csv(self):
+        with open("productslinks.csv") as file:
+            for row in file:
+                clc_link = row.split('\n')[0]
+                self.all_links.append(clc_link)
+
+        for num, item in enumerate(self.all_links):
+            drink_info = {}
+            rand_proxies = choice(proxy_list)
+            proxy = {"http": f"http://{rand_proxies}"}
+            req = requests.get(url=item, headers=self.headers, proxies=proxy)
+            soup2 = BeautifulSoup(req.text, "lxml")
+            try:
+                sku = soup2.find("div", class_="sku-dark").find("span").text.strip()
+                drink_info["number_row"]=num
+                stru_sku = f'{sku}STRU'
+                drink_info["sku"] = stru_sku
+            except:
+                pass
+
+            h1_title = soup2.find('h1').text.strip()
+            drink_info['title'] = h1_title
+            try:
+                old_price = soup2.find('div', class_='old-price').text.strip()
+                old_price_c = old_price.replace(' ', '')
+                drink_info['old_price'] = old_price_c
+            except:
+                drink_info['old_price'] = "0"
+
+            self.csv_rows.append(drink_info)
+            with open("storgom.csv", "w", encoding="utf-8") as file:
+                headers = ["number_row", "sku", "title", "old_price"]
+                w = csv.DictWriter(file, headers)
+                w.writeheader()
+                for row in self.csv_rows:
+                    w.writerow(row)
+                    print(row)
+
+
+
+
+
+
+
+
+
+    def main(self):
+        self.add_to_csv()
+        # self.get_all_products()
+        # self.get_main_catalog()
+        # self.get_sub_catalogs()
+        # self.get_pagination()
+        # asyncio.run(self.gather_tasks_pagination())
+        # self.get_links_from_file()
+        # self.get_all_links()
+
+
+
+if __name__ == "__main__":
+    parser = Parser()
+    parser.main()
+
+
+
+
+
+
